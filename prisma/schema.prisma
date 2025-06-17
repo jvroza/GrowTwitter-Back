@@ -1,0 +1,85 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id        String   @id @default(uuid()) @db.Uuid
+    name      String   @db.VarChar(255)
+    imageUrl  String?  @map("image_url") @db.VarChar(255)
+    username  String   @unique @db.VarChar(255)
+    password  String   @db.Text
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+    updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp
+
+    tweets     Tweet[]
+    likes      Like[]
+    follows    Follow[] @relation("follower")
+    followedBy Follow[] @relation("following")
+
+    @@map("users")
+}
+
+model Tweet {
+    id        String    @id @default(uuid()) @db.Uuid
+    content   String    @db.VarChar(300)
+    authorId  String    @map("author_id") @db.Uuid
+    type      TweetType @default(NORMAL)
+    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
+    updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp
+
+    author  User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    likes   Like[]
+    replies Reply[] @relation("tweet")
+    replyOf Reply?  @relation("reply")
+
+    @@map("tweets")
+}
+
+model Like {
+    tweetId   String   @map("tweet_id") @db.Uuid
+    authorId  String   @map("author_id") @db.Uuid
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+    updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp
+
+    author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    tweet  Tweet @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+
+    @@id([tweetId, authorId])
+    @@map("likes")
+}
+
+model Reply {
+    tweetId   String   @map("tweet_id") @db.Uuid
+    replyId   String   @unique @map("reply_id") @db.Uuid
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+    updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp
+
+    tweet Tweet @relation(fields: [tweetId], references: [id], name: "tweet", onDelete: Cascade)
+    reply Tweet @relation(fields: [replyId], references: [id], name: "reply", onDelete: Cascade)
+
+    @@id([tweetId, replyId])
+    @@map("replies")
+}
+
+model Follow {
+    followerId  String   @map("follower_id") @db.Uuid // quem segue
+    followingId String   @map("following_id") @db.Uuid // quem é seguido
+    createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp
+    updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp
+
+    follower  User @relation(fields: [followerId], references: [id], name: "follower", onDelete: Cascade)
+    following User @relation(fields: [followingId], references: [id], name: "following", onDelete: Cascade)
+
+    @@id([followerId, followingId])
+    @@map("follows")
+}
+
+enum TweetType {
+    NORMAL
+    REPLY
+}
