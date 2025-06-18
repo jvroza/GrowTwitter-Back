@@ -8,6 +8,7 @@ export function onError(error: unknown, res: Response): Response {
     return res.status(error.statusCode).json({
       success: false,
       message: error.message,
+      details: error.details,
     });
   }
 
@@ -21,6 +22,12 @@ export function onError(error: unknown, res: Response): Response {
   return res.status(500).json({
     success: false,
     message: "Internal server error",
-    detail: (error as Error).toString(),
+    details: [
+      {
+        type: "system",
+        field: "unknown",
+        description: (error as Error).toString(),
+      },
+    ],
   });
 }
