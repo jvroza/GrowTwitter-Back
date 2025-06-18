@@ -10,7 +10,7 @@ export class UsersController {
 
       const result = await service.listAll();
 
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         message: "Records listed successfully.",
         data: result.map((u) => u.toJSON()),
@@ -28,7 +28,7 @@ export class UsersController {
 
       const result = await service.getById(userId);
 
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         message: "Record found successfully.",
         data: result.toJSON(),
