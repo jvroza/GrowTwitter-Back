@@ -2,7 +2,7 @@ import express from "express";
 import { body } from "express-validator";
 
 import { AuthController } from "../controllers";
-import { dataValidation } from "../middlewares/data-validation.middleware";
+import { dataValidation } from "../middlewares";
 
 export class AuthRoutes {
   public static bind() {
