@@ -27,6 +27,7 @@ export function onError(error: unknown, res: Response): Response {
         type: "system",
         field: "unknown",
         description: (error as Error).toString(),
+        location: (error as Error).name,
       },
     ],
   });

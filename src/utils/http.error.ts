@@ -2,6 +2,7 @@ interface ErrorDetail {
   type: string;
   field: string;
   description: string;
+  location: string;
 }
 
 export class HTTPError extends Error {

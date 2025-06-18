@@ -23,6 +23,7 @@ export function dataValidation(validations: ContextRunner[]) {
           errors.map((e) => ({
             type: e.type,
             field: e.path,
+            location: e.location,
             description: e.msg,
           })),
         );
