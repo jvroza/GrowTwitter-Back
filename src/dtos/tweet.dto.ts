@@ -6,3 +6,12 @@ export interface CreateTweetDto {
 export type CreateReplyDto = CreateTweetDto & {
   replyTo: string;
 };
+
+export interface UpdateTweetDto extends CreateTweetDto {
+  tweetId: string;
+}
+
+export interface FindTweet {
+  tweetId: string;
+  authorId: string;
+}
