@@ -51,14 +51,14 @@ export class UserService {
     return users.map((user) => this.mapToModel(user));
   }
 
-  private mapToModel(user: UserEntity): User {
+  private mapToModel(entity: UserEntity): User {
     return new User(
-      user.id,
-      user.name,
-      user.imageUrl,
-      user.username,
-      user.createdAt,
-      user.updatedAt,
+      entity.id,
+      entity.name,
+      entity.imageUrl,
+      entity.username,
+      entity.createdAt,
+      entity.updatedAt,
     );
   }
 }
