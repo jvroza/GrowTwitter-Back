@@ -5,7 +5,8 @@ import prismaRepository from "../database/prisma.repository";
 import {
   CreateReplyDto,
   CreateTweetDto,
-  FindTweet,
+  DeleteTweetDto,
+  FindTweetDto,
   UpdateTweetDto,
 } from "../dtos";
 import { Tweet, User } from "../models";
@@ -55,9 +56,9 @@ export class TweetService {
     return this.mapToModel(newReply);
   }
 
-  public async findTweet(dto: FindTweet) {
+  public async findTweet(dto: FindTweetDto): Promise<Tweet> {
     const tweetDB = await prismaRepository.tweet.findUnique({
-      where: { id: dto.tweetId, authorId: dto.authorId },
+      where: { id: dto.tweetId },
       include: { author: true },
     });
 
@@ -80,10 +81,16 @@ export class TweetService {
     tweet.withAuthor(author);
     tweet.withReplies(replies);
     tweet.withLikes(likes);
+
+    return tweet;
   }
 
   public async updateTweet(dto: UpdateTweetDto): Promise<Tweet> {
-    await this.findTweet(dto);
+    const tweetFound = await this.findTweet(dto);
+
+    if (tweetFound.toJSON()?.author?.id !== dto.authorId) {
+      throw new HTTPError(403, "You are not allowed to update this tweet");
+    }
 
     const tweetUpdated = await prismaRepository.tweet.update({
       where: { id: dto.tweetId },
@@ -93,8 +100,12 @@ export class TweetService {
     return this.mapToModel(tweetUpdated);
   }
 
-  public async deleteTweet(dto: FindTweet): Promise<Tweet> {
-    await this.findTweet(dto);
+  public async deleteTweet(dto: DeleteTweetDto): Promise<Tweet> {
+    const tweetFound = await this.findTweet(dto);
+
+    if (tweetFound.toJSON()?.author?.id !== dto.authorId) {
+      throw new HTTPError(403, "You are not allowed to delete this tweet");
+    }
 
     const tweetDeleted = await prismaRepository.tweet.delete({
       where: { id: dto.tweetId },
@@ -124,7 +135,7 @@ export class TweetService {
     return tweets;
   }
 
-  public async listRepliesByTweetId(tweetId: string): Promise<Tweet[]> {
+  private async listRepliesByTweetId(tweetId: string): Promise<Tweet[]> {
     const repliesDB = await prismaRepository.reply.findMany({
       where: { tweetId },
       include: { reply: { include: { author: true } } },
