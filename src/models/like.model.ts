@@ -1,4 +1,10 @@
-import { User } from ".";
+import { User, UserDto } from ".";
+
+export interface LikeDto {
+  author: UserDto;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export class Like {
   constructor(
@@ -7,9 +13,9 @@ export class Like {
     private updatedAt: Date,
   ) {}
 
-  public toJSON() {
+  public toJSON(): LikeDto {
     return {
-      author: this.author,
+      author: this.author.toJSON(),
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };
