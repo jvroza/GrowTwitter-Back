@@ -1,6 +1,17 @@
-import { Like, User } from ".";
+import { Like, LikeDto, User, UserDto } from ".";
 
 type TweetType = "NORMAL" | "REPLY";
+
+export interface TweetDto {
+  id: string;
+  content: string;
+  type: TweetType;
+  createdAt: Date;
+  updatedAt: Date;
+  author?: UserDto;
+  replies?: TweetDto[];
+  likes?: LikeDto[];
+}
 
 export class Tweet {
   constructor(
@@ -29,16 +40,16 @@ export class Tweet {
     return this;
   }
 
-  public toJSON() {
+  public toJSON(): TweetDto {
     return {
       id: this.id,
       content: this.content,
       type: this.type,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      author: this.author,
-      replies: this.replies,
-      likes: this.likes,
+      author: this.author?.toJSON(),
+      replies: this.replies?.map((r) => r.toJSON()),
+      likes: this.likes?.map((l) => l.toJSON()),
     };
   }
 }

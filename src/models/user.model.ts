@@ -1,4 +1,17 @@
-import { Tweet } from ".";
+import { Tweet, TweetDto } from ".";
+
+export interface UserDto {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  username: string;
+  createdAt: Date;
+  updatedAt: Date;
+  password?: string;
+  tweets?: TweetDto[];
+  followers?: UserDto[];
+  following?: UserDto[];
+}
 
 export class User {
   constructor(
@@ -34,7 +47,7 @@ export class User {
     return this;
   }
 
-  public toJSON() {
+  public toJSON(): UserDto {
     return {
       id: this.id,
       name: this.name,
@@ -43,9 +56,9 @@ export class User {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       password: this.password,
-      tweets: this.tweets,
-      followers: this.followers,
-      following: this.following,
+      tweets: this.tweets?.map((t) => t.toJSON()),
+      followers: this.followers?.map((u) => u.toJSON()),
+      following: this.following?.map((u) => u.toJSON()),
     };
   }
 }
