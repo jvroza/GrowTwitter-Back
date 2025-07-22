@@ -24,7 +24,7 @@ export class AuthRoutes {
         body("name").isLength({ min: 3 }),
         body("username").isLength({ min: 3 }),
         body("password").isLength({ min: 5 }),
-        body("imageUrl").isURL(),
+        body("imageUrl").optional().isURL(),
       ]),
       controller.register,
     );
