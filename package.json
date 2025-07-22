@@ -8,7 +8,8 @@
     "start": "node ./build",
     "eslint:check": "npx eslint .",
     "eslint:fix": "npx eslint . --fix",
-    "prettier": "npx prettier --write ."
+    "prettier": "npx prettier --write .",
+    "postinstall": "npx prisma migrate deploy && npx prisma generate"
   },
   "keywords": [],
   "author": "",
