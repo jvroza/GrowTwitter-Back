@@ -55,6 +55,33 @@ export class TweetService {
     return this.mapToModel(newReply);
   }
 
+  public async findTweet(dto: FindTweet) {
+    const tweetDB = await prismaRepository.tweet.findUnique({
+      where: { id: dto.tweetId, authorId: dto.authorId },
+      include: { author: true },
+    });
+
+    if (!tweetDB) {
+      throw new HTTPError(404, "Tweet not found");
+    }
+
+    const replies = await this.listRepliesByTweetId(tweetDB.id);
+    const likes = await this.likeService.listLikesByTweetId(tweetDB.id);
+    const author = new User(
+      tweetDB.author.id,
+      tweetDB.author.name,
+      tweetDB.author.imageUrl,
+      tweetDB.author.username,
+      tweetDB.author.createdAt,
+      tweetDB.author.updatedAt,
+    );
+
+    const tweet = this.mapToModel(tweetDB);
+    tweet.withAuthor(author);
+    tweet.withReplies(replies);
+    tweet.withLikes(likes);
+  }
+
   public async updateTweet(dto: UpdateTweetDto): Promise<Tweet> {
     await this.findTweet(dto);
 
@@ -133,34 +160,46 @@ export class TweetService {
     return replies;
   }
 
-  public async findTweet(dto: FindTweet) {
-    const tweetDB = await prismaRepository.tweet.findUnique({
-      where: { id: dto.tweetId, authorId: dto.authorId },
+  public async feed(userId: string) {
+    const tweetsDB = await prismaRepository.tweet.findMany({
+      where: {
+        type: TweetType.NORMAL,
+        author: {
+          followedBy: {
+            some: {
+              followerId: userId,
+            },
+          },
+        },
+      },
       include: { author: true },
+      orderBy: { createdAt: "desc" },
     });
 
-    if (!tweetDB) {
-      throw new HTTPError(404, "Tweet not found");
+    const tweets: Tweet[] = [];
+
+    for (const tweet of tweetsDB) {
+      const replies = await this.listRepliesByTweetId(tweet.id);
+      const likes = await this.likeService.listLikesByTweetId(tweet.id);
+
+      const author = new User(
+        tweet.author.id,
+        tweet.author.name,
+        tweet.author.imageUrl,
+        tweet.author.username,
+        tweet.author.createdAt,
+        tweet.author.updatedAt,
+      );
+
+      const tweetModel = this.mapToModel(tweet);
+      tweetModel.withAuthor(author);
+      tweetModel.withReplies(replies);
+      tweetModel.withLikes(likes);
+      tweets.push(tweetModel);
     }
 
-    const replies = await this.listRepliesByTweetId(tweetDB.id);
-    const likes = await this.likeService.listLikesByTweetId(tweetDB.id);
-    const author = new User(
-      tweetDB.author.id,
-      tweetDB.author.name,
-      tweetDB.author.imageUrl,
-      tweetDB.author.username,
-      tweetDB.author.createdAt,
-      tweetDB.author.updatedAt,
-    );
-
-    const tweet = this.mapToModel(tweetDB);
-    tweet.withAuthor(author);
-    tweet.withReplies(replies);
-    tweet.withLikes(likes);
+    return tweets;
   }
-
-  public async feed(userId: string) {}
 
   private mapToModel(entity: TweetEntity): Tweet {
     return new Tweet(
