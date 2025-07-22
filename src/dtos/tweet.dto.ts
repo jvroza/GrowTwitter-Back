@@ -11,7 +11,10 @@ export interface UpdateTweetDto extends CreateTweetDto {
   tweetId: string;
 }
 
-export interface FindTweet {
+export interface FindTweetDto {
   tweetId: string;
+}
+
+export interface DeleteTweetDto extends FindTweetDto {
   authorId: string;
 }
