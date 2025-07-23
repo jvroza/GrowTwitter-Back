@@ -1,7 +1,10 @@
 import App from "./app";
 import { envs } from "./envs";
-import { AuthRoutes, UsersRoutes } from "./routes";
+import { AuthRoutes, TweetsRoutes, UsersRoutes } from "./routes";
 
-const app = new App([AuthRoutes.bind(), UsersRoutes.bind()], envs.PORT);
+const app = new App(
+  [AuthRoutes.bind(), UsersRoutes.bind(), TweetsRoutes.bind()],
+  envs.PORT,
+);
 
 app.listen();
