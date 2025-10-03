@@ -118,6 +118,7 @@ export class TweetService {
     const tweetsDB = await prismaRepository.tweet.findMany({
       where: { type: TweetType.NORMAL, authorId: userId },
       orderBy: { createdAt: "desc" },
+      include: { author: true },
     });
 
     const tweets: Tweet[] = [];
@@ -126,9 +127,19 @@ export class TweetService {
       const replies = await this.listRepliesByTweetId(tweet.id);
       const likes = await this.likeService.listLikesByTweetId(tweet.id);
 
+      const author = new User(
+        tweet.author.id,
+        tweet.author.name,
+        tweet.author.imageUrl,
+        tweet.author.username,
+        tweet.author.createdAt,
+        tweet.author.updatedAt,
+      );
+
       const tweetModel = this.mapToModel(tweet);
       tweetModel.withLikes(likes);
       tweetModel.withReplies(replies);
+      tweetModel.withAuthor(author);
       tweets.push(tweetModel);
     }
 

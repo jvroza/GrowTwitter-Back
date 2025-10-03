@@ -1,17 +1,20 @@
-import { Follow as FollowEntity } from "@prisma/client";
+import { User as UserEntity } from "@prisma/client";
 
 import prismaRepository from "../database/prisma.repository";
 import { FollowDto } from "../dtos";
+import { User } from "../models";
 import { HTTPError } from "../utils";
 
 export class FollowService {
   constructor() {}
 
   public async follow(dto: FollowDto): Promise<void> {
+    // Um usuário não pode seguir ele mesmo
     if (dto.followerId === dto.followingId) {
       throw new HTTPError(400, "You cannot follow yourself");
     }
 
+    // Um usuário não pode seguir o mesmo usuário mais de uma vez
     const existingFollow = await prismaRepository.follow.findUnique({
       where: {
         followerId_followingId: {
@@ -34,10 +37,12 @@ export class FollowService {
   }
 
   public async unfollow(dto: FollowDto): Promise<void> {
+    // Um usuário não pode deixar de seguir ele mesmo
     if (dto.followerId === dto.followingId) {
       throw new HTTPError(400, "Follower and following IDs cannot be the same");
     }
 
+    // Verifica se o follow existe antes de tentar remover
     const existingFollow = await prismaRepository.follow.findUnique({
       where: {
         followerId_followingId: {
@@ -53,73 +58,53 @@ export class FollowService {
 
     await prismaRepository.follow.delete({
       where: {
-        id: existingFollow.id,
+        followerId_followingId: {
+          followerId: dto.followerId,
+          followingId: dto.followingId,
+        },
       },
     });
   }
 
-  public async listFollowersByUserId(userId: string): Promise<any[]> {
-    const tweetsDB = await prismaRepository.tweet.findMany({
-      where: { type: TweetType.NORMAL, authorId: userId },
+  public async listFollowings(
+    userId: string,
+  ): Promise<{ followings: User[]; followers: User[] }> {
+    const followings = await this.listFollowingsByUserId(userId);
+    const followers = await this.listFollowersByUserId(userId);
+    return {
+      followings: followings,
+      followers: followers,
+    };
+  }
+
+  private async listFollowersByUserId(userId: string): Promise<User[]> {
+    // Busca na tabela de follows os usuários que seguem o userId
+    const followersDB = await prismaRepository.follow.findMany({
+      where: { followingId: userId },
       orderBy: { createdAt: "desc" },
+      include: { follower: true },
     });
 
-    const tweets: Tweet[] = [];
-
-    for (const tweet of tweetsDB) {
-      const replies = await this.listRepliesByTweetId(tweet.id);
-      const likes = await this.likeService.listLikesByTweetId(tweet.id);
-
-      const tweetModel = this.mapToModel(tweet);
-      tweetModel.withLikes(likes);
-      tweetModel.withReplies(replies);
-      tweets.push(tweetModel);
-    }
-
-    return tweets;
+    return followersDB.map((user) => this.mapToModel(user.follower));
   }
 
-  private async listFollowingsByUserId(userId: string): Promise<any[]> {
-    const repliesDB = await prismaRepository.reply.findMany({
-      where: { tweetId },
-      include: { reply: { include: { author: true } } },
+  private async listFollowingsByUserId(userId: string): Promise<User[]> {
+    // Busca na tabela de follows os usuários que seguem o userId
+    const followingsDB = await prismaRepository.follow.findMany({
+      where: { followerId: userId },
+      orderBy: { createdAt: "desc" },
+      include: { following: true },
     });
 
-    const replies: Tweet[] = [];
-
-    for (const r of repliesDB) {
-      const author = new User(
-        r.reply.author.id,
-        r.reply.author.name,
-        r.reply.author.imageUrl,
-        r.reply.author.username,
-        r.reply.author.createdAt,
-        r.reply.author.updatedAt,
-      );
-
-      const likes = await this.likeService.listLikesByTweetId(r.reply.id);
-
-      const reply = new Tweet(
-        r.reply.id,
-        r.reply.content,
-        r.reply.type,
-        r.reply.createdAt,
-        r.reply.updatedAt,
-      );
-
-      reply.withAuthor(author);
-      reply.withLikes(likes);
-      replies.push(reply);
-    }
-
-    return replies;
+    return followingsDB.map((user) => this.mapToModel(user.following));
   }
 
-  private mapToModel(entity: FollowEntity): Tweet {
-    return new Tweet(
+  private mapToModel(entity: UserEntity): User {
+    return new User(
       entity.id,
-      entity.content,
-      entity.type,
+      entity.name,
+      entity.imageUrl,
+      entity.username,
       entity.createdAt,
       entity.updatedAt,
     );

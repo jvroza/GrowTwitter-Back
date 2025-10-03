@@ -1,12 +1,20 @@
 import { Request, Response } from "express";
 
-import { UserService } from "../services";
+import {
+  FollowService,
+  LikeService,
+  TweetService,
+  UserService,
+} from "../services";
 import { onError } from "../utils";
 
 export class UsersController {
   public async index(_: Request, res: Response) {
     try {
-      const service = new UserService();
+      const service = new UserService(
+        new TweetService(new LikeService()),
+        new FollowService(),
+      );
 
       const result = await service.listAll();
 
@@ -24,7 +32,10 @@ export class UsersController {
     try {
       const { userId } = req.params;
 
-      const service = new UserService();
+      const service = new UserService(
+        new TweetService(new LikeService()),
+        new FollowService(),
+      );
 
       const result = await service.getById(userId);
 
