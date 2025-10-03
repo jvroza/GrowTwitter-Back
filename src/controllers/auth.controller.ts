@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
 
 import { BcryptAdapter } from "../adapters";
-import { UserService, AuthService } from "../services";
+import {
+  UserService,
+  AuthService,
+  TweetService,
+  FollowService,
+  LikeService,
+} from "../services";
 import { onError } from "../utils";
 
 export class AuthController {
@@ -9,7 +15,13 @@ export class AuthController {
     try {
       const { name, username, password, imageUrl } = req.body;
 
-      const service = new AuthService(new UserService(), new BcryptAdapter());
+      const service = new AuthService(
+        new UserService(
+          new TweetService(new LikeService()),
+          new FollowService(),
+        ),
+        new BcryptAdapter(),
+      );
 
       const result = await service.register({
         name,
@@ -32,7 +44,13 @@ export class AuthController {
     try {
       const { username, password } = req.body;
 
-      const service = new AuthService(new UserService(), new BcryptAdapter());
+      const service = new AuthService(
+        new UserService(
+          new TweetService(new LikeService()),
+          new FollowService(),
+        ),
+        new BcryptAdapter(),
+      );
 
       const result = await service.login({ username, password });
 
