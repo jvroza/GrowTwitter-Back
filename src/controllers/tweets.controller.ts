@@ -19,7 +19,7 @@ export class TweetsController {
       res.status(201).json({
         success: true,
         message: "Tweet created successfully.",
-        data: result,
+        data: result.toJSON(),
       });
     } catch (error) {
       onError(error, res);
@@ -38,7 +38,7 @@ export class TweetsController {
       res.status(201).json({
         success: true,
         message: "Reply published successfully.",
-        data: result,
+        data: result.toJSON(),
       });
     } catch (error) {
       onError(error, res);
@@ -58,7 +58,7 @@ export class TweetsController {
       res.status(200).json({
         success: true,
         message: "Record found successfully.",
-        data: result,
+        data: result.toJSON(),
       });
     } catch (error) {
       onError(error, res);
@@ -82,7 +82,7 @@ export class TweetsController {
       res.status(200).json({
         success: true,
         message: "Record updated successfully.",
-        data: result,
+        data: result.toJSON(),
       });
     } catch (error) {
       onError(error, res);
@@ -104,7 +104,7 @@ export class TweetsController {
       res.status(200).json({
         success: true,
         message: "Record deleted successfully.",
-        data: result,
+        data: result.toJSON(),
       });
     } catch (error) {
       onError(error, res);
@@ -122,7 +122,7 @@ export class TweetsController {
       res.status(200).json({
         success: true,
         message: "Records listed successfully.",
-        data: result,
+        data: result.map((t) => t.toJSON()),
       });
     } catch (error) {
       onError(error, res);
@@ -140,7 +140,7 @@ export class TweetsController {
       res.status(200).json({
         success: true,
         message: "Records listed successfully.",
-        data: result,
+        data: result.map((t) => t.toJSON()),
       });
     } catch (error) {
       onError(error, res);

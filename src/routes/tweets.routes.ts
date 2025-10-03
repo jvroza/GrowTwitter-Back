@@ -57,7 +57,7 @@ export class TweetsRoutes {
       controller.listTweetsByUserId,
     );
 
-    router.get("/tweets/feed", authMiddleware, controller.feed);
+    router.get("/feed", authMiddleware, controller.feed);
 
     return router;
   }

@@ -21,7 +21,7 @@ export class AuthController {
       res.status(201).json({
         success: true,
         message: "Registration completed successfully.",
-        data: result,
+        data: result.toJSON(),
       });
     } catch (error) {
       onError(error, res);
