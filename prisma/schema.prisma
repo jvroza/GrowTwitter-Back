@@ -71,7 +71,6 @@ model Follow {
     followingId String   @map("following_id") @db.Uuid // quem é seguido
     createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp
     updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp
-    testColuna  String
 
     follower  User @relation(fields: [followerId], references: [id], name: "follower", onDelete: Cascade)
     following User @relation(fields: [followingId], references: [id], name: "following", onDelete: Cascade)
