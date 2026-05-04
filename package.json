@@ -10,8 +10,7 @@
     "eslint:check": "npx eslint .",
     "eslint:fix": "npx eslint . --fix",
     "prettier": "npx prettier --write ."
-  }
-},
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
