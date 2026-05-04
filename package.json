@@ -4,13 +4,14 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
-    "build": "tsc",
-    "start": "node ./build",
+    "build": "npx prisma generate && npx tsc",
+    "start": "node dist/server.js",
+    "postinstall": "npx prisma migrate deploy && npx prisma generate",
     "eslint:check": "npx eslint .",
     "eslint:fix": "npx eslint . --fix",
-    "prettier": "npx prettier --write .",
-    "postinstall": "npx prisma migrate deploy && npx prisma generate"
-  },
+    "prettier": "npx prettier --write ."
+  }
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
